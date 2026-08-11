@@ -1,0 +1,28 @@
+# Secrets and local auth
+auth/auth.json
+auth/*.local.*
+**/.env
+**/.env.*
+**/secrets*
+
+# Backups created by install/sync
+**/*.bak.*
+**/*.bak
+
+# Pi runtime / cache (never track if someone copies live tree)
+agent/auth.json
+agent/sessions/
+agent/missions/
+agent/npm/
+agent/git/
+agent/models-store.json
+agent/trust.json
+agent/run-history.jsonl
+agent/models-store.json
+
+# Editor / OS junk
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/

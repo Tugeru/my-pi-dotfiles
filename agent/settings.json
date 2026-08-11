@@ -1,0 +1,12 @@
+{
+  "theme": "dark",
+  "defaultProvider": "kie",
+  "defaultModel": "grok-4-5",
+  "defaultThinkingLevel": "xhigh",
+  "hideThinkingBlock": false,
+  "packages": [
+    "npm:pi-subagents@0.46.0",
+    "git:github.com/kotarac/pi-fetch@v2.0.0",
+    "npm:pi-web-access@0.21.0"
+  ]
+}
