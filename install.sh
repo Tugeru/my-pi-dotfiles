@@ -78,12 +78,14 @@ EOF
 
 load_profile() {
   local file="$REPO_DIR/profiles/${PROFILE}.env"
+  local profile_orca=""
   if [[ -f "$file" ]]; then
     # shellcheck disable=SC1090
     source "$file"
-    # Profile sets defaults; explicit CLI flags win.
-    if [[ "$ORCA_SET" -eq 0 && -n "${WITH_ORCA:-}" ]]; then
-      WITH_ORCA="$WITH_ORCA"
+    # Capture profile WITH_ORCA before deciding; explicit CLI flags win.
+    profile_orca="${WITH_ORCA:-}"
+    if [[ "$ORCA_SET" -eq 0 && -n "$profile_orca" ]]; then
+      WITH_ORCA="$profile_orca"
     fi
     if [[ "${INSTALL_SKILLS:-1}" == "0" ]]; then SKIP_SKILLS=1; fi
     if [[ "${INSTALL_PACKAGES:-1}" == "0" ]]; then SKIP_PACKAGES=1; fi
@@ -101,7 +103,8 @@ backup_if_needed() {
     if [[ -L "$target" ]]; then
       return 0
     fi
-    local bak="${target}.bak.$(timestamp)"
+    local bak
+    bak="${target}.bak.$(timestamp)"
     log "backup $target -> $bak"
     run mv "$target" "$bak"
   fi
@@ -120,14 +123,14 @@ install_path() {
   if [[ -L "$dest" ]]; then
     local current
     current="$(readlink "$dest")"
-    if [[ "$current" == "$src" ]]; then
+    if [[ "$current" == "$src" && "$FORCE" -eq 0 ]]; then
       log "ok symlink $dest"
       return 0
     fi
     log "replace symlink $dest"
     run rm "$dest"
   elif [[ -e "$dest" ]]; then
-    if [[ "$MODE" == "copy" && -f "$src" && -f "$dest" ]] && cmp -s "$src" "$dest"; then
+    if [[ "$FORCE" -eq 0 && "$MODE" == "copy" && -f "$src" && -f "$dest" ]] && cmp -s "$src" "$dest"; then
       log "ok file $dest (identical)"
       return 0
     fi
