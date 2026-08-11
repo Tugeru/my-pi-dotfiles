@@ -352,7 +352,8 @@ doctor() {
 
   if command -v pi >/dev/null 2>&1; then
     printf '  OK  pi on PATH\n'
-    if [[ "$DRY_RUN" -eq 0 ]]; then
+    # pi list can reconcile/install packages from settings; skip when packages were skipped.
+    if [[ "$DRY_RUN" -eq 0 && "$SKIP_PACKAGES" -eq 0 ]]; then
       log "pi list"
       pi list || true
     fi

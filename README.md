@@ -113,9 +113,14 @@ See `auth/auth.json.example`. Real credentials stay only on each machine under `
 
 Providers used in this setup:
 
-- **kie** — API key
+- **kie** — API key (Grok 4.5, GPT-5.6 family, Gemini 3.6 Flash OpenAI + native Gemini body)
 - **opencode** / **opencode-go** — API key
 - **openai-codex** — OAuth via `/login`
+
+Native Kie Gemini (`kie/gemini-3-6-flash`, `google-generative-ai`) needs the
+`agent/extensions/kie-gemini-compat.ts` extension: Kie requires Bearer auth and
+sends SSE `[DONE]` without `finishReason`, which pi’s Google adapter does not
+handle alone.
 
 ## CI / local checks
 
