@@ -1,12 +1,40 @@
 {
   "theme": "dark",
   "defaultProvider": "kie",
-  "defaultModel": "grok-4-5",
+  "defaultModel": "gpt-5-6-sol",
   "defaultThinkingLevel": "xhigh",
   "hideThinkingBlock": false,
   "packages": [
     "npm:pi-subagents@0.46.0",
     "git:github.com/kotarac/pi-fetch@v2.0.0",
     "npm:pi-web-access@0.21.0"
-  ]
+  ],
+  "subagents": {
+    "agentOverrides": {
+      "scout": {
+        "model": "kie/gpt-5-6-luna",
+        "thinking": "high"
+      },
+      "worker": {
+        "model": "kie/grok-4-5",
+        "thinking": "xhigh"
+      },
+      "reviewer": {
+        "model": "kie/gpt-5-6-terra",
+        "thinking": "xhigh"
+      },
+      "researcher": {
+        "model": "kie/gemini-3-6-flash",
+        "thinking": "medium"
+      },
+      "oracle": {
+        "model": "kie/gpt-5-6-sol",
+        "thinking": "xhigh"
+      },
+      "delegate": {
+        "model": "opencode-go/deepseek-v4-flash",
+        "thinking": "max"
+      }
+    }
+  }
 }
