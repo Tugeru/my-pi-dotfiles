@@ -78,14 +78,13 @@ EOF
 
 load_profile() {
   local file="$REPO_DIR/profiles/${PROFILE}.env"
-  local profile_orca=""
+  local cli_orca="$WITH_ORCA"
   if [[ -f "$file" ]]; then
     # shellcheck disable=SC1090
     source "$file"
-    # Capture profile WITH_ORCA before deciding; explicit CLI flags win.
-    profile_orca="${WITH_ORCA:-}"
-    if [[ "$ORCA_SET" -eq 0 && -n "$profile_orca" ]]; then
-      WITH_ORCA="$profile_orca"
+    # Profile may set WITH_ORCA; explicit --with-orca/--no-orca wins.
+    if [[ "$ORCA_SET" -eq 1 ]]; then
+      WITH_ORCA="$cli_orca"
     fi
     if [[ "${INSTALL_SKILLS:-1}" == "0" ]]; then SKIP_SKILLS=1; fi
     if [[ "${INSTALL_PACKAGES:-1}" == "0" ]]; then SKIP_PACKAGES=1; fi
@@ -312,19 +311,38 @@ doctor() {
   check_link "$PI_AGENT_DIR/settings.json" "$REPO_DIR/agent/settings.json"
   check_link "$PI_AGENT_DIR/models.json" "$REPO_DIR/agent/models.json"
 
-  local ext
-  shopt -s nullglob
-  for ext in "$REPO_DIR/agent/extensions"/*; do
-    [[ -f "$ext" ]] || continue
-    check_link "$PI_AGENT_DIR/extensions/$(basename "$ext")" "$ext"
-  done
-  shopt -u nullglob
+  if [[ "$INSTALL_EXTENSIONS" -eq 1 ]]; then
+    local ext
+    shopt -s nullglob
+    for ext in "$REPO_DIR/agent/extensions"/*; do
+      [[ -f "$ext" ]] || continue
+      local base
+      base="$(basename "$ext")"
+      if [[ "$WITH_ORCA" -eq 0 ]]; then
+        local skip_ext=0 o
+        for o in "${ORCA_EXTENSIONS[@]}"; do
+          if [[ "$base" == "$o" ]]; then skip_ext=1; break; fi
+        done
+        if [[ "$skip_ext" -eq 1 ]]; then
+          continue
+        fi
+      fi
+      check_link "$PI_AGENT_DIR/extensions/$base" "$ext"
+    done
+    shopt -u nullglob
+  else
+    printf '  OK  extensions skipped (profile)\n'
+  fi
 
-  local name
-  for name in "${CORE_SKILLS[@]}"; do
-    [[ -d "$REPO_DIR/agents-skills/$name" ]] || continue
-    check_link "$AGENTS_SKILLS_DIR/$name" "$REPO_DIR/agents-skills/$name"
-  done
+  if [[ "$SKIP_SKILLS" -eq 0 ]]; then
+    local name
+    for name in "${CORE_SKILLS[@]}"; do
+      [[ -d "$REPO_DIR/agents-skills/$name" ]] || continue
+      check_link "$AGENTS_SKILLS_DIR/$name" "$REPO_DIR/agents-skills/$name"
+    done
+  else
+    printf '  OK  skills skipped (profile)\n'
+  fi
 
   if [[ -f "$PI_AGENT_DIR/auth.json" ]]; then
     printf '  OK  auth.json present (local)\n'
