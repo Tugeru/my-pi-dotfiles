@@ -1,0 +1,111 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install ShellCheck
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+
+      - name: ShellCheck
+        run: shellcheck install.sh scripts/*.sh
+
+      - name: Structure + JSON checks
+        run: ./scripts/ci-check.sh
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install smoke (isolated HOME, copy mode)
+        env:
+          HOME: ${{ runner.temp }}/pi-home-copy
+        run: |
+          set -euo pipefail
+          export PI_CODING_AGENT_DIR="$HOME/.pi/agent"
+          export PI_AGENTS_SKILLS_DIR="$HOME/.agents/skills"
+          mkdir -p "$HOME"
+
+          ./install.sh --dry-run --skip-packages --profile full
+
+          ./install.sh --mode copy --skip-packages --profile full
+
+          test -f "$PI_CODING_AGENT_DIR/settings.json"
+          test -f "$PI_CODING_AGENT_DIR/models.json"
+          test -f "$PI_CODING_AGENT_DIR/extensions/orca-prefill.ts"
+          test -f "$PI_CODING_AGENT_DIR/extensions/orca-agent-status.ts"
+          test -f "$PI_CODING_AGENT_DIR/extensions/orca-titlebar-spinner.ts"
+          test -f "$PI_AGENTS_SKILLS_DIR/caveman/SKILL.md"
+          test -f "$PI_AGENTS_SKILLS_DIR/computer-use/SKILL.md"
+          diff -u agent/settings.json "$PI_CODING_AGENT_DIR/settings.json"
+          diff -u agent/models.json "$PI_CODING_AGENT_DIR/models.json"
+
+          # minimal profile: no skills/extensions
+          export HOME="${{ runner.temp }}/pi-home-minimal"
+          export PI_CODING_AGENT_DIR="$HOME/.pi/agent"
+          export PI_AGENTS_SKILLS_DIR="$HOME/.agents/skills"
+          mkdir -p "$HOME"
+          ./install.sh --mode copy --skip-packages --profile minimal
+          test -f "$PI_CODING_AGENT_DIR/settings.json"
+          test -f "$PI_CODING_AGENT_DIR/models.json"
+          if [[ -e "$PI_CODING_AGENT_DIR/extensions/orca-prefill.ts" ]]; then
+            echo "minimal profile should skip extensions" >&2
+            exit 1
+          fi
+          if [[ -e "$PI_AGENTS_SKILLS_DIR/caveman" ]]; then
+            echo "minimal profile should skip skills" >&2
+            exit 1
+          fi
+
+          # no-orca: core skills yes, orca skills no
+          export HOME="${{ runner.temp }}/pi-home-no-orca"
+          export PI_CODING_AGENT_DIR="$HOME/.pi/agent"
+          export PI_AGENTS_SKILLS_DIR="$HOME/.agents/skills"
+          mkdir -p "$HOME"
+          ./install.sh --mode copy --skip-packages --profile full --no-orca
+          test -f "$PI_AGENTS_SKILLS_DIR/caveman/SKILL.md"
+          if [[ -e "$PI_CODING_AGENT_DIR/extensions/orca-prefill.ts" ]]; then
+            echo "--no-orca should skip orca extensions" >&2
+            exit 1
+          fi
+          if [[ -e "$PI_AGENTS_SKILLS_DIR/computer-use" ]]; then
+            echo "--no-orca should skip orca skills" >&2
+            exit 1
+          fi
+
+      - name: Install smoke (symlink mode)
+        env:
+          HOME: ${{ runner.temp }}/pi-home-symlink
+        run: |
+          set -euo pipefail
+          export PI_CODING_AGENT_DIR="$HOME/.pi/agent"
+          export PI_AGENTS_SKILLS_DIR="$HOME/.agents/skills"
+          mkdir -p "$HOME"
+
+          ./install.sh --mode symlink --skip-packages --profile full
+
+          test -L "$PI_CODING_AGENT_DIR/settings.json"
+          test -L "$PI_CODING_AGENT_DIR/models.json"
+          test -L "$PI_AGENTS_SKILLS_DIR/caveman"
+          test "$(readlink "$PI_CODING_AGENT_DIR/settings.json")" = "$GITHUB_WORKSPACE/agent/settings.json"
+          test "$(readlink "$PI_AGENTS_SKILLS_DIR/caveman")" = "$GITHUB_WORKSPACE/agents-skills/caveman"

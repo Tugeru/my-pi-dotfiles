@@ -2,6 +2,8 @@
 
 Portable [Pi](https://pi.dev) setup: settings, models, local extensions, skills, and package pins.
 
+[![ci](https://github.com/Tugeru/my-pi-dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/Tugeru/my-pi-dotfiles/actions/workflows/ci.yml)
+
 Daily sync is **git**, not manual copying. On this machine, managed files are **symlinked** from the repo into Pi’s config dirs, so edits in Pi are already in git.
 
 ## What this manages
@@ -114,3 +116,22 @@ Providers used in this setup:
 - **kie** — API key
 - **opencode** / **opencode-go** — API key
 - **openai-codex** — OAuth via `/login`
+
+## CI / local checks
+
+GitHub Actions runs on every push and PR:
+
+- ShellCheck on `install.sh` and `scripts/*.sh`
+- JSON + structure validation (`scripts/ci-check.sh`)
+- Gitleaks secret scan
+- Isolated `install.sh` smoke tests (copy + symlink, full/minimal/`--no-orca`)
+
+Run the same static checks locally:
+
+```bash
+./scripts/ci-check.sh
+shellcheck install.sh scripts/*.sh   # if shellcheck is installed
+./install.sh --dry-run --skip-packages
+```
+
+Package installs and live model calls are intentionally **not** required in CI.

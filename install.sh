@@ -336,8 +336,8 @@ doctor() {
       pi list || true
     fi
   else
-    printf '  BAD pi not on PATH\n'
-    ok=0
+    # Missing pi is a setup hint, not a broken dotfiles install (CI smoke skips packages).
+    printf '  WARN pi not on PATH (install with ./install.sh --pi-install or npm i -g @earendil-works/pi-coding-agent)\n'
   fi
 
   [[ "$ok" -eq 1 ]] || return 1
