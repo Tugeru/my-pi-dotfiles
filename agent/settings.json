@@ -1,8 +1,8 @@
 {
   "theme": "dark",
   "defaultProvider": "kie",
-  "defaultModel": "gemini-3-6-flash",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "gpt-5-6-sol",
+  "defaultThinkingLevel": "xhigh",
   "hideThinkingBlock": false,
   "retry": {
     "enabled": true,
@@ -18,7 +18,9 @@
     "npm:pi-subagents@0.46.0",
     "git:github.com/kotarac/pi-fetch@v2.0.0",
     "npm:pi-web-access@0.21.0",
-    "npm:pi-mcp-adapter@2.22.0"
+    "npm:pi-mcp-adapter@2.22.0",
+    "npm:context-mode",
+    "npm:pi-token-count"
   ],
   "subagents": {
     "agentOverrides": {
