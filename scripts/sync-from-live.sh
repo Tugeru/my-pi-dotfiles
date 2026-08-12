@@ -86,6 +86,7 @@ fi
 
 copy_file "$PI_AGENT_DIR/models.json" "$REPO_DIR/agent/models.json"
 copy_file "$PI_AGENT_DIR/keybindings.json" "$REPO_DIR/agent/keybindings.json"
+copy_file "$PI_AGENT_DIR/mcp.json" "$REPO_DIR/agent/mcp.json"
 
 # extensions (files only at top level + optional subagent config)
 if [[ -d "$PI_AGENT_DIR/extensions" ]]; then

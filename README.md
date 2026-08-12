@@ -12,6 +12,7 @@ Daily sync is **git**, not manual copying. On this machine, managed files are **
 |--------------|-------------|
 | `agent/settings.json` | `~/.pi/agent/settings.json` |
 | `agent/models.json` | `~/.pi/agent/models.json` |
+| `agent/mcp.json` | `~/.pi/agent/mcp.json` |
 | `agent/extensions/*` | `~/.pi/agent/extensions/*` |
 | `agents-skills/<name>/` | `~/.agents/skills/<name>/` |
 
@@ -20,6 +21,11 @@ Packages (from `settings.json`):
 - `npm:pi-subagents@0.46.0`
 - `npm:pi-web-access@0.21.0`
 - `git:github.com/kotarac/pi-fetch@v2.0.0`
+- `npm:pi-mcp-adapter@2.22.0`
+
+MCP servers (from `agent/mcp.json`, via `pi-mcp-adapter`):
+
+- `next-devtools` → `npx -y next-devtools-mcp@0.4.0` (lazy; needs Next.js 16+ `npm run dev` for runtime tools)
 
 ## Never tracked
 
@@ -96,6 +102,7 @@ git diff
 agent/                 # → ~/.pi/agent
   settings.json
   models.json
+  mcp.json             # Pi-global MCP servers (next-devtools, …)
   extensions/
 agents-skills/         # → ~/.agents/skills
 auth/
@@ -106,6 +113,29 @@ scripts/
   sync-from-live.sh
 install.sh
 ```
+
+## MCP / Next.js DevTools
+
+Pi has no built-in MCP. This setup uses `pi-mcp-adapter` plus a tracked
+`agent/mcp.json`.
+
+After install (or after editing `mcp.json`):
+
+1. Restart Pi, or run `/reload`
+2. Check status: `/mcp` or `mcp({})`
+3. In a Next.js 16+ app, start the dev server (`npm run dev`)
+4. Discover runtime tools: `mcp({ tool: "nextjs_index" })` then
+   `mcp({ tool: "nextjs_call", args: { port: 3000, toolName: "get_errors" } })`
+
+`nextjs_docs` and `browser_eval` work without a running dev server.
+`browser_eval` only guides setup of `agent-browser`; it does not drive a browser.
+
+Telemetry from next-devtools is disabled via `NEXT_TELEMETRY_DISABLED=1` in
+`agent/mcp.json`.
+
+Project-local overrides (not managed by this repo) can still use `.mcp.json` or
+`.pi/mcp.json` in an app checkout; Pi-project `.pi/mcp.json` wins for
+enable/disable flags.
 
 ## Auth
 

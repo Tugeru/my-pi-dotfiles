@@ -40,6 +40,7 @@ DEFAULT_PACKAGES=(
   "npm:pi-subagents@0.46.0"
   "npm:pi-web-access@0.21.0"
   "git:github.com/kotarac/pi-fetch@v2.0.0"
+  "npm:pi-mcp-adapter@2.22.0"
 )
 
 log()  { printf '==> %s\n' "$*"; }
@@ -207,6 +208,9 @@ install_agent_files() {
 
   install_path "$REPO_DIR/agent/settings.json" "$PI_AGENT_DIR/settings.json"
   install_path "$REPO_DIR/agent/models.json" "$PI_AGENT_DIR/models.json"
+  if [[ -f "$REPO_DIR/agent/mcp.json" ]]; then
+    install_path "$REPO_DIR/agent/mcp.json" "$PI_AGENT_DIR/mcp.json"
+  fi
 
   if [[ "$INSTALL_EXTENSIONS" -eq 0 ]]; then
     log "skip extensions (profile)"
@@ -310,6 +314,9 @@ doctor() {
 
   check_link "$PI_AGENT_DIR/settings.json" "$REPO_DIR/agent/settings.json"
   check_link "$PI_AGENT_DIR/models.json" "$REPO_DIR/agent/models.json"
+  if [[ -f "$REPO_DIR/agent/mcp.json" ]]; then
+    check_link "$PI_AGENT_DIR/mcp.json" "$REPO_DIR/agent/mcp.json"
+  fi
 
   if [[ "$INSTALL_EXTENSIONS" -eq 1 ]]; then
     local ext

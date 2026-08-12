@@ -17,6 +17,7 @@ required_paths=(
   install.sh
   agent/settings.json
   agent/models.json
+  agent/mcp.json
   auth/auth.json.example
   profiles/full.env
   profiles/minimal.env
@@ -37,6 +38,7 @@ done
 json_files=(
   agent/settings.json
   agent/models.json
+  agent/mcp.json
   auth/auth.json.example
 )
 while IFS= read -r -d '' f; do
@@ -96,11 +98,13 @@ npm_pin = re.compile(r"^npm:(@?[^@/]+(?:/[^@]+)?)@[^@]+$")
 # git:host/path@ref  or git:git@host:path@ref — require a ref after final @
 git_pin = re.compile(r"^git:.+@[^@/]+$")
 
+package_sources = []
 for p in packages:
     if isinstance(p, dict):
         src = p.get("source", "")
     else:
         src = str(p)
+    package_sources.append(src)
     if src.startswith("npm:"):
         if npm_pin.match(src):
             passed(f"pinned npm {src}")
@@ -116,6 +120,38 @@ for p in packages:
         passed(f"local package path {src}")
     else:
         fail(f"unknown package source form: {src}")
+
+if not any(s.startswith("npm:pi-mcp-adapter@") for s in package_sources):
+    fail("settings.packages must include pinned npm:pi-mcp-adapter@version")
+else:
+    passed("settings includes pi-mcp-adapter")
+
+mcp = json.loads(Path("agent/mcp.json").read_text())
+servers = mcp.get("mcpServers")
+if not isinstance(servers, dict) or not servers:
+    fail("agent/mcp.json must define non-empty mcpServers")
+else:
+    passed(f"mcp.json has {len(servers)} server(s)")
+
+next_devtools = servers.get("next-devtools")
+if not isinstance(next_devtools, dict):
+    fail("agent/mcp.json missing mcpServers.next-devtools")
+else:
+    cmd = next_devtools.get("command")
+    args = next_devtools.get("args") or []
+    if cmd != "npx":
+        fail(f"next-devtools.command should be npx, got {cmd!r}")
+    else:
+        passed("next-devtools uses npx")
+    if not any(isinstance(a, str) and a.startswith("next-devtools-mcp@") for a in args):
+        fail("next-devtools.args must pin next-devtools-mcp@version")
+    else:
+        passed("next-devtools pins next-devtools-mcp")
+    env = next_devtools.get("env") or {}
+    if env.get("NEXT_TELEMETRY_DISABLED") != "1":
+        fail("next-devtools.env.NEXT_TELEMETRY_DISABLED should be '1'")
+    else:
+        passed("next-devtools disables telemetry")
 
 if "providers" not in models or not models["providers"]:
     fail("models.json missing providers")
