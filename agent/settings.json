@@ -2,8 +2,18 @@
   "theme": "dark",
   "defaultProvider": "kie",
   "defaultModel": "gemini-3-6-flash",
-  "defaultThinkingLevel": "xhigh",
+  "defaultThinkingLevel": "high",
   "hideThinkingBlock": false,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 10,
+    "baseDelayMs": 2000,
+    "provider": {
+      "timeoutMs": 3600000,
+      "maxRetries": 0,
+      "maxRetryDelayMs": 60000
+    }
+  },
   "packages": [
     "npm:pi-subagents@0.46.0",
     "git:github.com/kotarac/pi-fetch@v2.0.0",
@@ -37,5 +47,6 @@
         "thinking": "max"
       }
     }
-  }
+  },
+  "lastChangelogVersion": "0.84.1"
 }

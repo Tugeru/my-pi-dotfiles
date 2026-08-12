@@ -152,6 +152,11 @@ Native Kie Gemini (`kie/gemini-3-6-flash`, `google-generative-ai`) needs the
 sends SSE `[DONE]` without `finishReason`, which pi’s Google adapter does not
 handle alone.
 
+`agent/extensions/persistent-error-retry.ts` keeps working after provider/system
+errors Pi does not auto-retry (for example Kie GPT-5.6 Sol `Unexpected end of
+JSON input`). After built-in retries settle, it waits 2s and resumes until the
+turn succeeds, the user aborts (Esc), or `/persistent-retry off`.
+
 ## CI / local checks
 
 GitHub Actions runs on every push and PR:

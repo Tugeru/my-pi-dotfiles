@@ -35,19 +35,26 @@
         {
           "id": "gemini-3-6-flash",
           "name": "Gemini 3.6 Flash (Kie.ai)",
-          "api": "google-generative-ai",
-          "baseUrl": "https://api.kie.ai/gemini/v1",
+          "api": "openai-completions",
+          "baseUrl": "https://api.kie.ai/gemini-3-6-flash-openai/v1",
           "reasoning": true,
           "input": ["text", "image"],
           "cost": { "input": 1.5, "output": 7.5, "cacheRead": 0.15, "cacheWrite": 0 },
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false,
+            "supportsFinishReason": false,
+            "maxTokensField": "max_tokens",
+            "requiresAssistantAfterToolResult": true
+          },
           "contextWindow": 1048576,
           "maxTokens": 65536,
           "thinkingLevelMap": {
             "off": null,
-            "minimal": "MINIMAL",
-            "low": "LOW",
-            "medium": "MEDIUM",
-            "high": "HIGH",
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
             "xhigh": null,
             "max": null
           }
@@ -64,7 +71,8 @@
             "supportsStore": false,
             "supportsDeveloperRole": false,
             "supportsFinishReason": false,
-            "maxTokensField": "max_tokens"
+            "maxTokensField": "max_tokens",
+            "requiresAssistantAfterToolResult": true
           },
           "contextWindow": 1048576,
           "maxTokens": 65536,
@@ -74,6 +82,26 @@
             "medium": "medium",
             "high": "high",
             "minimal": null,
+            "xhigh": null,
+            "max": null
+          }
+        },
+        {
+          "id": "gemini-3-6-flash-google",
+          "name": "Gemini 3.6 Flash (Google API, broken on Kie SSE)",
+          "api": "google-generative-ai",
+          "baseUrl": "https://api.kie.ai/gemini/v1",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "cost": { "input": 1.5, "output": 7.5, "cacheRead": 0.15, "cacheWrite": 0 },
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": "MINIMAL",
+            "low": "LOW",
+            "medium": "MEDIUM",
+            "high": "HIGH",
             "xhigh": null,
             "max": null
           }
