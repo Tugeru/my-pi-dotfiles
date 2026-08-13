@@ -107,6 +107,30 @@
           }
         },
         {
+          "id": "grok-4-6",
+          "name": "Grok 4.6 (Kie.ai)",
+          "api": "openai-responses",
+          "baseUrl": "https://api.kie.ai/grok/v1",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "cost": { "input": 2, "output": 6, "cacheRead": 0.5, "cacheWrite": 0 },
+          "compat": {
+            "supportsDeveloperRole": false,
+            "sessionAffinityFormat": "openai-nosession"
+          },
+          "contextWindow": 500000,
+          "maxTokens": 500000,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": null
+          }
+        },
+        {
           "id": "grok-4-5",
           "name": "Grok 4.5 (Kie.ai)",
           "api": "openai-responses",
