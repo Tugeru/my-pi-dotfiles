@@ -1,8 +1,8 @@
 {
   "theme": "dark",
-  "defaultProvider": "kie",
-  "defaultModel": "gpt-5-6-sol",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4-flash",
+  "defaultThinkingLevel": "max",
   "hideThinkingBlock": false,
   "retry": {
     "enabled": true,
@@ -20,7 +20,7 @@
     "npm:pi-web-access@0.21.0",
     "npm:pi-mcp-adapter@2.22.0",
     "npm:context-mode",
-    "npm:pi-token-count"
+    "npm:pi-zentui"
   ],
   "subagents": {
     "agentOverrides": {
@@ -37,7 +37,7 @@
         "thinking": "xhigh"
       },
       "researcher": {
-        "model": "kie/gemini-3-6-flash",
+        "model": "kie/gpt-5-6-luna",
         "thinking": "medium"
       },
       "oracle": {
