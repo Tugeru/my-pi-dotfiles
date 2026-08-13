@@ -7,6 +7,9 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODE="symlink"              # symlink | copy
 PROFILE="full"              # full | minimal | orca
 DRY_RUN=0
+CHANGES=0                   # destinations that would change (dry-run counters)
+UNCHANGED=0
+PKGS=0
 SKIP_PACKAGES=0
 SKIP_SKILLS=0
 WITH_ORCA=1
@@ -46,9 +49,10 @@ DEFAULT_PACKAGES=(
 log()  { printf '==> %s\n' "$*"; }
 warn() { printf 'warn: %s\n' "$*" >&2; }
 die()  { printf 'error: %s\n' "$*" >&2; exit 1; }
-run()  {
+act()  {
+  # Preview (dry-run) or execute a change command. Caller tracks counters.
   if [[ "$DRY_RUN" -eq 1 ]]; then
-    printf 'dry-run: %s\n' "$*"
+    printf 'would: %s\n' "$*"
   else
     "$@"
   fi
@@ -67,7 +71,7 @@ Options:
   --skip-skills         Do not install skills
   --pi-install          Install/update the pi CLI via npm if missing
   --force               Replace managed targets even if they exist as regular files
-  --dry-run             Print actions without changing the system
+  --dry-run             Preview actions (would: ...) without changing the system; ends with a change summary
   --doctor              Only verify the current install
   -h, --help            Show this help
 
@@ -105,8 +109,12 @@ backup_if_needed() {
     fi
     local bak
     bak="${target}.bak.$(timestamp)"
-    log "backup $target -> $bak"
-    run mv "$target" "$bak"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      printf 'would: mv %s %s\n' "$target" "$bak"
+    else
+      log "backup $target -> $bak"
+      mv "$target" "$bak"
+    fi
   fi
 }
 
@@ -118,20 +126,22 @@ install_path() {
   dest_dir="$(dirname "$dest")"
 
   [[ -e "$src" || -L "$src" ]] || die "missing source: $src"
-  run mkdir -p "$dest_dir"
+  [[ -d "$dest_dir" ]] || act mkdir -p "$dest_dir"
 
   if [[ -L "$dest" ]]; then
     local current
     current="$(readlink "$dest")"
     if [[ "$current" == "$src" && "$FORCE" -eq 0 ]]; then
       log "ok symlink $dest"
+      UNCHANGED=$((UNCHANGED + 1))
       return 0
     fi
     log "replace symlink $dest"
-    run rm "$dest"
+    act rm "$dest"
   elif [[ -e "$dest" ]]; then
     if [[ "$FORCE" -eq 0 && "$MODE" == "copy" && -f "$src" && -f "$dest" ]] && cmp -s "$src" "$dest"; then
       log "ok file $dest (identical)"
+      UNCHANGED=$((UNCHANGED + 1))
       return 0
     fi
     # Symlink mode always replaces regular files/dirs so live path tracks the repo.
@@ -139,17 +149,22 @@ install_path() {
   fi
 
   if [[ "$MODE" == "symlink" ]]; then
-    log "symlink $dest -> $src"
-    run ln -s "$src" "$dest"
-  else
-    if [[ -d "$src" ]]; then
-      log "copy dir $src -> $dest"
-      run cp -a "$src" "$dest"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      printf 'would: ln -s %s %s\n' "$src" "$dest"
     else
-      log "copy $src -> $dest"
-      run cp -a "$src" "$dest"
+      log "symlink $dest -> $src"
+      ln -s "$src" "$dest"
     fi
+  elif [[ "$DRY_RUN" -eq 1 ]]; then
+    printf 'would: cp -a %s %s\n' "$src" "$dest"
+  elif [[ -d "$src" ]]; then
+    log "copy dir $src -> $dest"
+    cp -a "$src" "$dest"
+  else
+    log "copy $src -> $dest"
+    cp -a "$src" "$dest"
   fi
+  CHANGES=$((CHANGES + 1))
 }
 
 ensure_pi() {
@@ -159,8 +174,13 @@ ensure_pi() {
   fi
   if [[ "$INSTALL_PI" -eq 1 ]]; then
     command -v npm >/dev/null 2>&1 || die "npm required to install pi"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      printf 'would: npm install -g --ignore-scripts @earendil-works/pi-coding-agent\n'
+      CHANGES=$((CHANGES + 1))
+      return 0
+    fi
     log "installing pi CLI via npm"
-    run npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+    act npm install -g --ignore-scripts @earendil-works/pi-coding-agent
     command -v pi >/dev/null 2>&1 || die "pi installed but not on PATH"
   else
     die "pi not found on PATH. Install it, or re-run with --pi-install"
@@ -191,10 +211,11 @@ install_packages() {
   local pkg
   while IFS= read -r pkg; do
     [[ -z "$pkg" ]] && continue
-    log "pi install $pkg"
     if [[ "$DRY_RUN" -eq 1 ]]; then
-      printf 'dry-run: pi install %s\n' "$pkg"
+      printf 'would: pi install %s\n' "$pkg"
+      PKGS=$((PKGS + 1))
     else
+      log "pi install $pkg"
       # pi install is idempotent enough; ignore already-present noise
       if ! pi install "$pkg"; then
         warn "pi install failed for $pkg (continuing)"
@@ -204,7 +225,10 @@ install_packages() {
 }
 
 install_agent_files() {
-  run mkdir -p "$PI_AGENT_DIR"/{extensions,skills,prompts,themes}
+  local d
+  for d in extensions skills prompts themes; do
+    [[ -d "$PI_AGENT_DIR/$d" ]] || act mkdir -p "$PI_AGENT_DIR/$d"
+  done
 
   install_path "$REPO_DIR/agent/settings.json" "$PI_AGENT_DIR/settings.json"
   install_path "$REPO_DIR/agent/models.json" "$PI_AGENT_DIR/models.json"
@@ -237,7 +261,7 @@ install_agent_files() {
 
   # Optional subagent config if present in repo
   if [[ -f "$REPO_DIR/agent/extensions/subagent/config.json" ]]; then
-    run mkdir -p "$PI_AGENT_DIR/extensions/subagent"
+    [[ -d "$PI_AGENT_DIR/extensions/subagent" ]] || act mkdir -p "$PI_AGENT_DIR/extensions/subagent"
     install_path \
       "$REPO_DIR/agent/extensions/subagent/config.json" \
       "$PI_AGENT_DIR/extensions/subagent/config.json"
@@ -246,7 +270,7 @@ install_agent_files() {
 
 install_skills() {
   [[ "$SKIP_SKILLS" -eq 1 ]] && { log "skip skills"; return 0; }
-  run mkdir -p "$AGENTS_SKILLS_DIR"
+  [[ -d "$AGENTS_SKILLS_DIR" ]] || act mkdir -p "$AGENTS_SKILLS_DIR"
 
   local skills=("${CORE_SKILLS[@]}")
   if [[ "$WITH_ORCA" -eq 1 ]]; then
@@ -395,9 +419,23 @@ done
 
 load_profile
 
+print_summary() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    printf 'dry-run summary: %d would change, %d up to date, %d package(s) to install\n' \
+      "$CHANGES" "$UNCHANGED" "$PKGS"
+  fi
+}
+
 if [[ "$DOCTOR_ONLY" -eq 1 ]]; then
-  doctor
-  exit $?
+  if doctor; then
+    rc=0
+  else
+    rc=1
+  fi
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    print_summary
+  fi
+  exit "$rc"
 fi
 
 log "repo:     $REPO_DIR"
@@ -414,6 +452,8 @@ print_auth_help
 
 if [[ "$DRY_RUN" -eq 0 ]]; then
   doctor || warn "doctor reported issues"
+else
+  print_summary
 fi
 
 log "done"

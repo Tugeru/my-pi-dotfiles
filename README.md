@@ -63,6 +63,10 @@ pi
 ./install.sh --doctor
 ```
 
+`--dry-run` prints every action as `would: <command>` without touching the system, then ends
+with a summary of what would change vs. what is already up to date. Safe to run anytime, also
+with `--pi-install` on a machine without pi.
+
 ## Day-to-day workflow
 
 **This machine (symlinks):**
