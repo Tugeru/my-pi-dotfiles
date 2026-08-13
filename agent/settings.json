@@ -2,7 +2,7 @@
   "theme": "dark",
   "defaultProvider": "opencode-go",
   "defaultModel": "deepseek-v4-flash",
-  "defaultThinkingLevel": "max",
+  "defaultThinkingLevel": "high",
   "hideThinkingBlock": false,
   "retry": {
     "enabled": true,
