@@ -151,10 +151,11 @@ Providers used in this setup:
 - **opencode** / **opencode-go** — API key
 - **openai-codex** — OAuth via `/login`
 
-Native Kie Gemini (`kie/gemini-3-6-flash`, `google-generative-ai`) needs the
-`agent/extensions/kie-gemini-compat.ts` extension: Kie requires Bearer auth and
-sends SSE `[DONE]` without `finishReason`, which pi’s Google adapter does not
-handle alone.
+Native Kie Gemini (`kie/gemini-3-6-flash-google`, `kie/gemini-3-7-flash-google`, `google-generative-ai`) needs the
+`agent/extensions/kie-gemini-compat.ts` extension: Kie requires Bearer auth, sends
+SSE `[DONE]` without `finishReason`, and routes by API model name (the pi-facing
+`-google` id is rewritten to the API id, e.g. `gemini-3-7-flash-google` →
+`gemini-3-7-flash`) — none of which pi’s Google adapter handles alone.
 
 `agent/extensions/persistent-error-retry.ts` keeps working after provider/system
 errors Pi does not auto-retry (for example Kie GPT-5.6 Sol `Unexpected end of

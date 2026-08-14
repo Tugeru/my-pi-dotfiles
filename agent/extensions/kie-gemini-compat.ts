@@ -11,6 +11,11 @@
  *    Gemini 3 Flash detector, so default streamSimple would send thinkingBudget
  *    instead of thinkingLevel. We route those models through stream() with
  *    explicit thinkingLevel values.
+ *
+ * Kie also routes by API model name, not the pi-facing id, and rejects
+ * `thinkingLevel: MINIMAL`: we rewrite the `-google` pi id to the API id and
+ * use `thinkingBudget: 0` for minimal/off instead (see kieApiModel/
+ * kieThinkingConfig).
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
@@ -146,6 +151,21 @@ function mapGoogleThinkingLevel(
 	}
 }
 
+/**
+ * Kie's Gemini proxy rejects nested `thinkingConfig.thinkingLevel: "MINIMAL"`
+ * with HTTP 500 (verified for gemini-3-7-flash), while `thinkingLevel`
+ * LOW/MEDIUM/HIGH and `thinkingBudget: 0` work. Route minimal/off through
+ * `thinkingBudget: 0` so hidden thinking stays hidden without a 500.
+ */
+function kieThinkingConfig(
+	effort: "minimal" | "low" | "medium" | "high" | "xhigh" | "max",
+): { enabled: true; level: "MINIMAL" | "LOW" | "MEDIUM" | "HIGH" } | { enabled: true; budgetTokens: 0 } {
+	if (effort === "minimal") {
+		return { enabled: true, budgetTokens: 0 };
+	}
+	return { enabled: true, level: mapGoogleThinkingLevel(effort) };
+}
+
 function isKieNativeGeminiModel(model: Model<string>): boolean {
 	return (
 		model.provider === "kie" &&
@@ -153,6 +173,17 @@ function isKieNativeGeminiModel(model: Model<string>): boolean {
 		typeof model.baseUrl === "string" &&
 		model.baseUrl.includes("api.kie.ai/gemini")
 	);
+}
+
+/**
+ * Kie routes native Gemini by API model name, not the pi-facing id.
+ * pi ids use a `-google` suffix (e.g. `gemini-3-7-flash-google`) to keep
+ * the native entry distinct from the OpenAI-body entries; the API model
+ * is the same name without the suffix (`gemini-3-7-flash`).
+ */
+function kieApiModel(model: Model<string>): Model<string> {
+	const apiId = model.id.replace(/-google$/, "");
+	return apiId === model.id ? model : { ...model, id: apiId };
 }
 
 function googleApi() {
@@ -181,12 +212,15 @@ export default function (pi: ExtensionAPI) {
 				throw new Error(`No API key for provider: ${model.provider}`);
 			}
 
+			// pi-facing `-google` id -> API model id (gemini-3-7-flash-google -> gemini-3-7-flash).
+			const apiModel = kieApiModel(model);
+
 			// thinkingLevelMap marks off unsupported; clamp away from it.
 			if (!options?.reasoning) {
 				// Keep hidden thinking at the lowest level (Gemini 3 Flash cannot fully disable).
-				return api.stream(model, context, {
+				return api.stream(apiModel, context, {
 					...options,
-					thinking: { enabled: true, level: "MINIMAL" },
+					thinking: kieThinkingConfig("minimal"),
 				});
 			}
 
@@ -199,12 +233,9 @@ export default function (pi: ExtensionAPI) {
 				| "xhigh"
 				| "max";
 
-			return api.stream(model, context, {
+			return api.stream(apiModel, context, {
 				...options,
-				thinking: {
-					enabled: true,
-					level: mapGoogleThinkingLevel(effort),
-				},
+				thinking: kieThinkingConfig(effort),
 			});
 		},
 	});
