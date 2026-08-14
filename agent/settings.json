@@ -1,7 +1,7 @@
 {
   "theme": "dark",
-  "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-v4-flash",
+  "defaultProvider": "kie",
+  "defaultModel": "grok-4-6",
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": false,
   "retry": {
