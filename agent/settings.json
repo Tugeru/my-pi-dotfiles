@@ -1,9 +1,9 @@
 {
-  "theme": "dark",
-  "defaultProvider": "kie",
-  "defaultModel": "grok-4-6",
-  "defaultThinkingLevel": "high",
-  "hideThinkingBlock": false,
+  "theme": "cc-dark",
+  "defaultProvider": "9router",
+  "defaultModel": "implementer",
+  "defaultThinkingLevel": "xhigh",
+  "hideThinkingBlock": true,
   "retry": {
     "enabled": true,
     "maxRetries": 10,
@@ -20,7 +20,11 @@
     "npm:pi-web-access@0.21.0",
     "npm:pi-mcp-adapter@2.22.0",
     "npm:context-mode",
-    "npm:pi-zentui"
+    "npm:pi-hashline-edit-pro@2.5.3",
+    "npm:pi-token-count@0.1.2",
+    "npm:pi-cc-extensions@0.8.56",
+    "npm:pi-9router-ext",
+    "npm:pi-skill-palette"
   ],
   "subagents": {
     "agentOverrides": {
@@ -50,5 +54,7 @@
       }
     }
   },
-  "lastChangelogVersion": "0.84.1"
+  "lastChangelogVersion": "0.84.2",
+  "tuiMode": "fullscreen",
+  "fullscreenScrollbar": "always"
 }

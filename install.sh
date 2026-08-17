@@ -44,6 +44,10 @@ DEFAULT_PACKAGES=(
   "npm:pi-web-access@0.21.0"
   "git:github.com/kotarac/pi-fetch@v2.0.0"
   "npm:pi-mcp-adapter@2.22.0"
+  "npm:context-mode"
+  "npm:pi-hashline-edit-pro@2.5.3"
+  "npm:pi-token-count@0.1.2"
+  "npm:pi-cc-extensions@0.8.56"
 )
 
 log()  { printf '==> %s\n' "$*"; }

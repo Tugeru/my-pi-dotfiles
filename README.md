@@ -22,6 +22,10 @@ Packages (from `settings.json`):
 - `npm:pi-web-access@0.21.0`
 - `git:github.com/kotarac/pi-fetch@v2.0.0`
 - `npm:pi-mcp-adapter@2.22.0`
+- `npm:context-mode`
+- `npm:pi-hashline-edit-pro@2.5.3` — disables built-in `edit`; use hash-anchored `read` / `replace` / `undo_last_replace`
+- `npm:pi-token-count@0.1.2` — footer: `tokens | %/window used | $ spent | model/reasoning`
+- `npm:pi-cc-extensions@0.8.56` — Claude Code-style TUI (`/ccstyle`, `/context`); UI is English
 
 MCP servers (from `agent/mcp.json`, via `pi-mcp-adapter`):
 
