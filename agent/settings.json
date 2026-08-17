@@ -1,8 +1,8 @@
 {
   "theme": "cc-dark",
-  "defaultProvider": "9router",
-  "defaultModel": "implementer",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "kie",
+  "defaultModel": "grok-4-6",
+  "defaultThinkingLevel": "medium",
   "hideThinkingBlock": true,
   "retry": {
     "enabled": true,
