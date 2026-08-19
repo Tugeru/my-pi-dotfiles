@@ -301,6 +301,39 @@
           }
         }
       ]
+    },
+    "9router-free": {
+      "authHeader": true,
+      "apiKey": "!jq -r '.apiKey // empty' $HOME/.pi/agent/9router-config.json",
+      "baseUrl": "http://localhost:20128/v1",
+      "models": [
+        {
+          "id": "oc/deepseek-v4-flash-free",
+          "name": "DeepSeek V4 Flash Free (9router)",
+          "api": "openai-completions",
+          "reasoning": true,
+          "input": ["text"],
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false,
+            "supportsReasoningEffort": true,
+            "maxTokensField": "max_tokens",
+            "thinkingFormat": "openai"
+          },
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        }
+      ]
     }
   }
 }
