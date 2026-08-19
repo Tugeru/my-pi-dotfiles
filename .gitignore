@@ -20,6 +20,9 @@ agent/trust.json
 agent/run-history.jsonl
 agent/models-store.json
 
+# Node package install trees
+node_modules/
+
 # Editor / OS junk
 .DS_Store
 *.swp
