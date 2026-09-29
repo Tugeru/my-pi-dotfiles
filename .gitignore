@@ -1,6 +1,7 @@
 # Secrets and local auth
 auth/auth.json
 auth/*.local.*
+auth/composio.env
 **/.env
 **/.env.*
 **/secrets*

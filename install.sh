@@ -47,7 +47,6 @@ DEFAULT_PACKAGES=(
   "npm:context-mode"
   "npm:pi-hashline-edit-pro@2.5.3"
   "npm:pi-token-count@0.1.2"
-  "npm:pi-cc-extensions@0.8.56"
 )
 
 log()  { printf '==> %s\n' "$*"; }
@@ -302,6 +301,12 @@ Auth (local only — never committed):
   After install, in pi:
     /login          # OAuth providers (e.g. OpenAI Codex)
   Or set API keys via /login or environment variables for kie/opencode.
+
+Composio MCP (local only — never committed):
+  Example:    $REPO_DIR/auth/composio.env.example
+  Write key:  ~/.config/composio/api-key          (Composio Connect, ck_...)
+              ~/.config/composio/platform-api-key (Composio Platform, ak_...)
+  Or export:  COMPOSIO_CONNECT_API_KEY / COMPOSIO_API_KEY
 
 EOF
 }

@@ -1,13 +1,25 @@
 {
   "mcpServers": {
-    "next-devtools": {
-      "command": "npx",
-      "args": ["-y", "next-devtools-mcp@0.4.0"],
+    "composio": {
+      "url": "https://connect.composio.dev/mcp",
+      "headers": {
+        "x-consumer-api-key": "!if [ -n \"$COMPOSIO_CONNECT_API_KEY\" ]; then printf %s \"$COMPOSIO_CONNECT_API_KEY\"; else cat \"$HOME/.config/composio/api-key\"; fi"
+      },
+      "protocolVersion": "auto",
       "lifecycle": "lazy",
-      "requestTimeoutMs": 30000,
-      "env": {
-        "NEXT_TELEMETRY_DISABLED": "1"
-      }
+      "idleTimeout": 10,
+      "requestTimeoutMs": 120000,
+      "debug": false
+    },
+    "composio-platform": {
+      "disabled": true,
+      "_comment": "Platform (developer) Composio. Generate a session with mcp:true, then paste session.mcp.url + session.mcp.headers here. Requires COMPOSIO_API_KEY (ak_...) as x-api-key. Set disabled:false once filled in.",
+      "url": "REPLACE_ME_SESSION_MCP_URL",
+      "headers": {
+        "x-api-key": "!cat \"$HOME/.config/composio/platform-api-key\""
+      },
+      "protocolVersion": "auto",
+      "lifecycle": "lazy"
     }
   }
 }
