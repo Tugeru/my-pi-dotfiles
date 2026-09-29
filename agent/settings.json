@@ -1,8 +1,8 @@
 {
-  "theme": "cc-dark",
-  "defaultProvider": "kie",
-  "defaultModel": "gpt-5-6-luna",
-  "defaultThinkingLevel": "low",
+  "theme": "dark",
+  "defaultProvider": "opencode",
+  "defaultModel": "ling-3.0-tiny-free",
+  "defaultThinkingLevel": "high",
   "hideThinkingBlock": true,
   "retry": {
     "enabled": true,
@@ -15,46 +15,43 @@
     }
   },
   "packages": [
-    "npm:pi-subagents@0.46.0",
     "git:github.com/kotarac/pi-fetch@v2.0.0",
     "npm:pi-web-access@0.21.0",
     "npm:pi-mcp-adapter@2.22.0",
     "npm:context-mode",
-    "npm:pi-hashline-edit-pro@2.5.3",
     "npm:pi-token-count@0.1.2",
-    "npm:pi-cc-extensions@0.8.56",
     "npm:pi-9router-ext",
-    "npm:pi-skill-palette"
+    "npm:pi-subagents",
+    "npm:@juicesharp/rpiv-todo"
   ],
   "subagents": {
+    "defaultModel": "space-bunny-free",
+    "defaultProvider": "opencode",
     "agentOverrides": {
       "scout": {
-        "model": "kie/gpt-5-6-luna",
-        "thinking": "high"
-      },
-      "worker": {
-        "model": "kie/grok-4-5",
-        "thinking": "xhigh"
-      },
-      "reviewer": {
-        "model": "kie/gpt-5-6-terra",
-        "thinking": "xhigh"
+        "model": "space-bunny-free"
       },
       "researcher": {
-        "model": "kie/gpt-5-6-luna",
-        "thinking": "medium"
+        "model": "space-bunny-free"
+      },
+      "evidence-auditor": {
+        "model": "space-bunny-free"
+      },
+      "worker": {
+        "model": "space-bunny-free"
+      },
+      "reviewer": {
+        "model": "space-bunny-free"
       },
       "oracle": {
-        "model": "kie/gpt-5-6-sol",
-        "thinking": "xhigh"
+        "model": "space-bunny-free"
       },
       "delegate": {
-        "model": "opencode-go/deepseek-v4-flash",
-        "thinking": "max"
+        "model": "space-bunny-free"
       }
     }
   },
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.87.1",
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "always"
 }
