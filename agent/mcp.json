@@ -1,25 +1,21 @@
 {
   "mcpServers": {
     "composio": {
+      "description": "Composio tool catalog and action execution",
       "url": "https://connect.composio.dev/mcp",
       "headers": {
         "x-consumer-api-key": "!if [ -n \"$COMPOSIO_CONNECT_API_KEY\" ]; then printf %s \"$COMPOSIO_CONNECT_API_KEY\"; else cat \"$HOME/.config/composio/api-key\"; fi"
       },
-      "protocolVersion": "auto",
-      "lifecycle": "lazy",
-      "idleTimeout": 10,
-      "requestTimeoutMs": 120000,
-      "debug": false
+      "timeout": 120,
+      "exposure": "direct"
     },
     "composio-platform": {
-      "disabled": true,
-      "_comment": "Platform (developer) Composio. Generate a session with mcp:true, then paste session.mcp.url + session.mcp.headers here. Requires COMPOSIO_API_KEY (ak_...) as x-api-key. Set disabled:false once filled in.",
-      "url": "REPLACE_ME_SESSION_MCP_URL",
+      "enabled": false,
+      "_comment": "Platform (developer) Composio. Generate a session with mcp:true, then paste session.mcp.url + session.mcp.headers here. Requires COMPOSIO_API_KEY (ak_...) as x-api-key. Set enabled:true and replace the .invalid placeholder URL once filled in.",
+      "url": "https://REPLACE_ME_SESSION_MCP_URL.invalid/mcp",
       "headers": {
         "x-api-key": "!cat \"$HOME/.config/composio/platform-api-key\""
-      },
-      "protocolVersion": "auto",
-      "lifecycle": "lazy"
+      }
     }
   }
 }

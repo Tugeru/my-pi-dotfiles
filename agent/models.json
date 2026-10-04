@@ -443,6 +443,40 @@
       "baseUrl": "https://home-lab.taild41bb3.ts.net/v1",
       "models": [
         {
+          "id": "cc/claude-sonnet-5-5",
+          "name": "Claude Sonnet 5.5 (9router cc)",
+          "api": "openai-completions",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 2,
+            "output": 10,
+            "cacheRead": 0.2,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false,
+            "supportsReasoningEffort": true,
+            "maxTokensField": "max_tokens",
+            "thinkingFormat": "openai"
+          },
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
           "id": "oc/muse-spark-1.2-contributor-free",
           "name": "Muse Spark 1.2 Contributor Free (9router)",
           "api": "openai-completions",
@@ -543,9 +577,67 @@
             "xhigh": null,
             "max": "max"
           }
+        },
+        {
+          "id": "oc/fledge-alpha-free",
+          "name": "Fledge Alpha Free (9router)",
+          "api": "openai-completions",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false,
+            "supportsReasoningEffort": true,
+            "maxTokensField": "max_tokens",
+            "thinkingFormat": "openai"
+          },
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
         }
       ],
       "modelOverrides": {
+        "cx/gpt-6.1-sol": {
+          "name": "GPT-6.1 Sol (9router cx)",
+          "contextWindow": 1000000,
+          "maxTokens": 128000,
+          "cost": {
+            "input": 2,
+            "output": 10,
+            "cacheRead": 0.1,
+            "cacheWrite": 2.5
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
         "cx/gpt-6-luna": {
           "name": "GPT-6 Luna (9router cx)",
           "contextWindow": 400000,

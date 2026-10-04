@@ -1,8 +1,8 @@
 {
   "theme": "dark",
   "defaultProvider": "opencode",
-  "defaultModel": "ling-3.0-tiny-free",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "space-bunny-free",
+  "defaultThinkingLevel": "xhigh",
   "hideThinkingBlock": true,
   "retry": {
     "enabled": true,
@@ -17,12 +17,12 @@
   "packages": [
     "git:github.com/kotarac/pi-fetch@v2.0.0",
     "npm:pi-web-access@0.21.0",
-    "npm:pi-mcp-adapter@2.22.0",
     "npm:context-mode",
     "npm:pi-token-count@0.1.2",
     "npm:pi-9router-ext",
     "npm:pi-subagents",
-    "npm:@juicesharp/rpiv-todo"
+    "npm:@juicesharp/rpiv-todo",
+    "npm:pi-pretty-tui"
   ],
   "subagents": {
     "defaultModel": "space-bunny-free",
@@ -51,7 +51,7 @@
       }
     }
   },
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.0.2",
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "always"
 }
