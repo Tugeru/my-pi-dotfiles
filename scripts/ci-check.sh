@@ -291,13 +291,53 @@ for pattern in auth/auth.json models-store.json; do
 done
 
 # --- scripts executable ---
-for s in install.sh scripts/ci-check.sh scripts/doctor.sh scripts/sync-from-live.sh; do
+for s in install.sh scripts/ci-check.sh scripts/doctor.sh scripts/sync-from-live.sh scripts/refresh-9router-cache.sh; do
   if [[ -x "$s" ]]; then
     pass "executable $s"
   else
     fail "not executable $s"
   fi
 done
+
+# --- modelOverrides must be internally consistent ---
+# An override patches a model the extension discovered from /v1/models. If the id
+# is never discovered the override is silently inert, so the two layers are easy
+# to get out of sync. This only validates static shape; whether an id is actually
+# served is a live-router question (see scripts/refresh-9router-cache.sh).
+python3 - <<'PY'
+import json, sys
+from pathlib import Path
+
+def fail(msg):
+    print(f"  FAIL {msg}", file=sys.stderr)
+
+def passed(msg):
+    print(f"  OK  {msg}")
+
+models = json.loads(Path("agent/models.json").read_text())
+problems = []
+for provider, cfg in (models.get("providers") or {}).items():
+    overrides = cfg.get("modelOverrides") or {}
+    for model_id, override in overrides.items():
+        if not override.get("name"):
+            problems.append(f"{provider}/{model_id}: override has no name")
+        cw = override.get("contextWindow")
+        mt = override.get("maxTokens")
+        if cw is not None and mt is not None and mt > cw:
+            problems.append(f"{provider}/{model_id}: maxTokens {mt} > contextWindow {cw}")
+        # pi's openai-completions path falls back to the level name when a
+        # thinkingLevelMap key is absent, so every mapped level must be present.
+        tlm = override.get("thinkingLevelMap")
+        if tlm is not None and "off" not in tlm:
+            problems.append(f"{provider}/{model_id}: thinkingLevelMap must contain 'off'")
+
+if problems:
+    for p in problems:
+        fail(f"modelOverride {p}")
+    sys.exit(1)
+
+passed(f"modelOverrides well-formed ({sum(len(c.get('modelOverrides') or {}) for c in (models.get('providers') or {}).values())} override(s))")
+PY
 
 echo
 if [[ "$failures" -gt 0 ]]; then
