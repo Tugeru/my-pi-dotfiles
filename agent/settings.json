@@ -22,7 +22,8 @@
     "npm:pi-9router-ext",
     "npm:pi-subagents",
     "npm:@juicesharp/rpiv-todo",
-    "npm:pi-pretty-tui"
+    "npm:pi-pretty-tui",
+    "npm:pi-skill-palette"
   ],
   "subagents": {
     "defaultModel": "space-bunny-free",
@@ -51,7 +52,7 @@
       }
     }
   },
-  "lastChangelogVersion": "1.0.2",
+  "lastChangelogVersion": "1.1.0",
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "always"
 }
