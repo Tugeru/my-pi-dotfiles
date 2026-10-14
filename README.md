@@ -151,10 +151,73 @@ applied last, after the extension's dynamic registration, so it always wins:
 
 ```json
 "modelOverrides": {
-  "cx/gpt-6-luna": { "name": "GPT-6 Luna (9router cx)", "contextWindow": 400000, "maxTokens": 128000 },
-  "cx/gpt-6-sol":  { "name": "GPT-6 Sol (9router cx)",  "contextWindow": 400000, "maxTokens": 128000 }
+  "cx/gpt-6.1-sol": { "name": "GPT-6.1 Sol (9router cx)", "contextWindow": 1000000, "maxTokens": 128000 },
+  "cx/gpt-6-luna":  { "name": "GPT-6 Luna (9router cx)",  "contextWindow": 400000,  "maxTokens": 128000 },
+  "cx/gpt-6-sol":   { "name": "GPT-6 Sol (9router cx)",   "contextWindow": 400000,  "maxTokens": 128000 }
 }
 ```
+
+### `modelOverrides` only applies to models the extension knows about
+
+An override is a *patch*, not a declaration. If the router's `/v1/models` does
+not return the id, `pi-9router-ext` never registers it and the override is
+silently inert — the model is missing from `/model` and from any remote client,
+with no warning. This is why `oc/muse-spark-1.3-contributor-free` needs a static
+entry in `providers[].models` (see below) rather than an override.
+
+A missing `cx/*` override in the picker is therefore nearly always a
+*discovery* problem, not an `models.json` problem.
+
+### Discovery cache: the model list is only as fresh as `~/.cache/pi/`
+
+`pi-9router-ext` snapshots `/v1/models` to
+`~/.cache/pi/9router-discovery-cache.json` and registers from that snapshot on
+startup, then refreshes in the background. Two consequences:
+
+- The cache is **never invalidated by age**. A snapshot from weeks ago is
+  served indefinitely, so a model newly added upstream stays invisible until
+  something rewrites the file.
+- The background refresh is capped at `STARTUP_DISCOVERY_TIMEOUT_MS = 5000`
+  (`src/index.ts`), but this router's `/v1/models` takes **~10.6s** to answer
+  (1937 ids). The refresh *always* aborts:
+
+  ```
+  [pi-9router-ext] startup model discovery skipped: This operation was aborted
+  ```
+
+  so the snapshot never self-heals. Symptom: the model shows up in a long-lived
+  interactive `pi` TUI session (which eventually completes a discovery some
+  other way) but never in a short-lived headless one.
+
+That second point is why this bites **paseo** specifically. Paseo builds its
+model catalog by spawning `pi --mode rpc --no-session`, calling
+`get_available_models`, and immediately closing the process
+(`providers/pi/agent.js` → `fetchCatalog`). That short-lived process always
+reports the stale snapshot, and the catalog is then cached per workspace in
+`ProviderSnapshotManager`. Remote `/model` therefore shows stale ids while the
+local TUI looks fine.
+
+Verify which list you are actually seeing:
+
+```bash
+{ printf '%s\n' '{"id":1,"type":"get_available_models"}'; sleep 20; } \
+  | pi --mode rpc --no-session 2>/dev/null \
+  | jq -r 'select(.id==1) | .data.models[] | "\(.provider)/\(.id) ctx=\(.contextWindow)"' \
+  | grep -i sol
+```
+
+To refresh the snapshot, run the tracked helper (it preserves `webRoutes` and
+the credential fingerprint the extension validates against, and writes via
+temp-file + rename so a running pi never sees a half-written cache):
+
+```bash
+./scripts/refresh-9router-cache.sh
+```
+
+After refreshing, restart the paseo daemon (or force a catalog refresh in the
+app) — `ProviderSnapshotManager` caches the catalog per workspace and will not
+re-poll pi on its own.
+
 
 Measured against the live route (2026-09-28): a 902k-token prompt succeeds,
 930k fails with `finish_reason: "failed"`. OpenAI's published spec for both
